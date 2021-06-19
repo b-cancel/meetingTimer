@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
+import 'package:meeting_timer/picker.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,105 +11,223 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Meeting Timer',
+      home: Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomeState createState() => _HomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeState extends State<Home> {
+  late int currentAmPmIndex;
+  late List<PickerItem<String>> amPmPickerOptions;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  late int currentHourIndex;
+  late List<PickerItem<String>> hourPickerOptions;
+
+  late int currentMinuteIndex;
+  late List<PickerItem<String>> minutePickerOptions;
+
+  late int currentSecond;
+  late List<PickerItem<String>> secondPickerOptions;
+
+  @override
+  void initState() {
+    //layout the options
+    amPmPickerOptions = [
+      PickerItem(value: "AM"),
+      PickerItem(value: "PM"),
+    ];
+    hourPickerOptions = getPickerItemListOfNumber(
+      1,
+      12,
+    );
+    minutePickerOptions = getPickerItemListOfNumber(
+      0,
+      59,
+    );
+    secondPickerOptions = getPickerItemListOfNumber(
+      0,
+      45,
+      increments: 15,
+    );
+
+    //select an option based on the current time
+    DateTime now = DateTime.now();
+    int hour0To23 = now.hour;
+    currentAmPmIndex = (hour0To23 < 12) ? 0 : 1;
+
+    //conver to normal time
+    int hour1To12;
+    if (hour0To23 == 0) {
+      hour1To12 = 12;
+    } else if (hour0To23 > 13) {
+      hour1To12 = hour0To23 - 12;
+    } else {
+      hour1To12 = hour0To23;
+    }
+    //1 to 12 is 1 based, current hour is 0 based
+    currentHourIndex = hour1To12 - 1;
+
+    //minutes are 0 to 59, 0 based index
+    currentMinuteIndex = now.minute;
+
+    //0:0, 1:15, 2:30, 3:45, 4
+    int rawSecondsIndex = 0; //now.second ~/ 15;
+    currentSecond = rawSecondsIndex;
+
+    //start up tries to help them picker their deadline
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    double itemExtent = 48;
+    double height = itemExtent * 2;
+    double fontSize = itemExtent / 2;
+
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: SafeArea(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+          children: [
+            Expanded(
+              child: Container(
+                color: Colors.black,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(24),
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24,
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(
+                            bottom: 16,
+                          ),
+                          child: Text(
+                            "Select Deadline",
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 36,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MyPicker(
+                                selectedOption: currentHourIndex,
+                                options: hourPickerOptions,
+                                looping: true,
+                                itemExtent: itemExtent,
+                                fontSize: fontSize,
+                                height: height,
+                              ),
+                            ),
+                            Text(
+                              ":",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 46,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Expanded(
+                              child: MyPicker(
+                                selectedOption: currentMinuteIndex,
+                                options: minutePickerOptions,
+                                itemExtent: itemExtent,
+                                fontSize: fontSize,
+                                height: height,
+                              ),
+                            ),
+                            /*
+                            Text(
+                              ",",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 46,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Expanded(
+                              child: MyPicker(
+                                selectedOption: currentSecond,
+                                options: secondPickerOptions,
+                                itemExtent: itemExtent,
+                                fontSize: fontSize,
+                                height: height,
+                              ),
+                            ),
+                            */
+                            Expanded(
+                              child: MyPicker(
+                                selectedOption: currentAmPmIndex,
+                                options: amPmPickerOptions,
+                                itemExtent: itemExtent,
+                                fontSize: fontSize,
+                                height: height,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            Container(
+              color: Colors.black,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 8,
+                ),
+                child: Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(56),
+                  color: Colors.green,
+                  child: InkWell(
+                    onTap: () {},
+                    child: Container(
+                      height: 56,
+                      child: Center(
+                        child: Text(
+                          "Start 00:00 Timer",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
