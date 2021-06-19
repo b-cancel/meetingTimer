@@ -24,6 +24,7 @@ class MyPicker extends StatelessWidget {
     required this.itemExtent,
     required this.height,
     required this.fontSize,
+    required this.selected,
     Key? key,
   }) : super(key: key);
 
@@ -33,6 +34,7 @@ class MyPicker extends StatelessWidget {
   final double itemExtent;
   final double fontSize;
   final double height;
+  final ValueNotifier selected;
 
   @override
   Widget build(BuildContext context) {
@@ -67,26 +69,18 @@ class MyPicker extends StatelessWidget {
         data: options,
       ),
       onSelect: (Picker picker, int index, List<int> ints) {
-        /*
-        //haptics
-        Vibrator.vibrateOnce(
-          duration: Duration(milliseconds: 250),
-        );
-
-        //grab minutes and seconds
+        print("index: " + index.toString());
         List selections = picker.getSelectedValues();
-        int newMinutes = int.parse(selections[0]);
-        int newSeconds = int.parse(selections[1]);
-
-        //seconds affects minutes
-        minutesSeconds = separateMinutesAndSeconds(widget.duration.value);
-
-        //update duration
-        widget.duration.value = Duration(
-          minutes: newMinutes, 
-          seconds: newSeconds,
-        );
-        */
+        int newIntValue = int.tryParse(selections[0]) ?? -1;
+        if (newIntValue != -1) {
+          selected.value = newIntValue;
+        } else {
+          if (selections[0] == "AM") {
+            selected.value = true;
+          } else {
+            selected.value = false;
+          }
+        }
       },
     ).makePicker();
   }
