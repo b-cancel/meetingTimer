@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:meeting_timer/picker.dart';
+import 'package:meeting_timer/timer.dart';
+import 'package:page_transition/page_transition.dart';
+
+import 'display.dart';
 
 void main() {
   runApp(MyApp());
@@ -179,7 +183,7 @@ class _HomeState extends State<Home> {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: 16,
-                  horizontal: 8,
+                  horizontal: 16,
                 ),
                 child: StartTimer(
                   isAm: isAm,
@@ -219,14 +223,11 @@ class _StartTimerState extends State<StartTimer> {
   }
 
   automaticReload() async {
-    print("auto reload soon");
     await Future.delayed(
       Duration(milliseconds: 50),
     );
 
-    print("reload");
     if (mounted) {
-      print("ctn");
       setState(() {});
       automaticReload();
     }
@@ -257,58 +258,6 @@ class _StartTimerState extends State<StartTimer> {
     return string;
   }
 
-  getDurationDescription(Duration duration) {
-    int hours = duration.inHours;
-
-    //adjust minutes
-    int minutes = duration.inMinutes % 60;
-
-    //adjust seconds
-    int seconds = duration.inSeconds - (minutes * 60) - (hours * 3600);
-
-    //convert
-    String? hoursString = intToString(hours, "h");
-    String? minutesString = intToString(minutes, "m");
-    String? secondsString = intToString(seconds, "s");
-
-    //add spaces where they are required
-
-    //none of them are null
-    if (hoursString != null && minutesString != null && secondsString != null) {
-      return hoursString + ", " + minutesString + " and " + secondsString;
-    } else {
-      //all of them are null
-      if (hoursString == null &&
-          minutesString == null &&
-          secondsString == null) {
-        return "00:00:00";
-      } else {
-        //one of them IS NULL
-        if (hoursString == null &&
-            minutesString != null &&
-            secondsString != null) {
-          //hours is null
-          return minutesString + " and " + secondsString;
-        } else if (hoursString != null &&
-            minutesString == null &&
-            secondsString != null) {
-          //minutes is null
-          return hoursString + " and " + secondsString;
-        } else if (hoursString != null &&
-            minutesString != null &&
-            secondsString == null) {
-          //seconds is null
-          return hoursString + " and " + minutesString;
-        } else {
-          //one of them IS NOT NULL
-          return (hoursString ?? "") +
-              (minutesString ?? "") +
-              (secondsString ?? "");
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     //the timer will run from now... to the time we selected
@@ -319,7 +268,6 @@ class _StartTimerState extends State<StartTimer> {
 
     //adjust hour back to 0To23
     int finalHour = widget.hourPicked.value;
-    print("final hour: " + finalHour.toString());
     //0 | 1->12 | 13 -> 23
     if (finalHour == 12) {
       if (widget.isAm.value) {
@@ -337,27 +285,10 @@ class _StartTimerState extends State<StartTimer> {
     //timer hours...
     DateTime thisTime = DateTime(1, 1, 1, thisHour, thisMinute, thisSecond);
     DateTime finalTime = DateTime(1, 1, 1, finalHour, finalMinute, finalSecond);
-
-    print("THIS hour: " +
-        thisHour.toString() +
-        " minute: " +
-        thisMinute.toString() +
-        " second: " +
-        thisSecond.toString());
-
-    print("FINAL hour: " +
-        finalHour.toString() +
-        " minute: " +
-        finalMinute.toString() +
-        " second: " +
-        finalSecond.toString());
-
     Duration difference = finalTime.difference(thisTime);
-    print("dif: " + difference.toString());
     if (finalTime.isBefore(thisTime)) {
       difference = Duration(hours: 24) - difference.abs();
     }
-    print("aff: " + difference.toString());
 
     //print as one might expect
     return Material(
@@ -365,16 +296,55 @@ class _StartTimerState extends State<StartTimer> {
       borderRadius: BorderRadius.circular(56),
       color: Colors.green,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.bottomToTop,
+              child: Theme(
+                data: ThemeData.dark(),
+                child: Timer(
+                  deadline: widget.hourPicked.value.toString() +
+                      ":" +
+                      widget.minutePicked.value.toString() +
+                      " " +
+                      (widget.isAm.value ? "AM" : "PM"),
+                  timerDuration: difference,
+                ),
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(56),
         child: Container(
           height: 56,
           child: Center(
-            child: Text(
-              "Start " + getDurationDescription(difference) + " Timer",
+            child: DefaultTextStyle(
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: 16,
+                    ),
+                    child: Text("Start"),
+                  ),
+                  MyTimerDisplay(
+                    duration: difference,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                    ),
+                    child: Text("Timer"),
+                  ),
+                ],
               ),
             ),
           ),
