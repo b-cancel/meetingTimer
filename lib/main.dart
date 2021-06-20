@@ -3,7 +3,7 @@ import 'package:flutter_picker/flutter_picker.dart';
 import 'package:meeting_timer/picker.dart';
 import 'package:meeting_timer/timer.dart';
 import 'package:page_transition/page_transition.dart';
-
+import 'customPageRoute.dart';
 import 'display.dart';
 
 void main() {
@@ -297,16 +297,16 @@ class _StartTimerState extends State<StartTimer> {
       color: Colors.green,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            PageTransition(
-              type: PageTransitionType.bottomToTop,
+          Navigator.of(context).pushReplacement(
+            VerticalSlidePageTransition(
+              animateDown: false,
+              childCurrent: Home(),
               child: Theme(
                 data: ThemeData.dark(),
                 child: Timer(
                   deadline: widget.hourPicked.value.toString() +
                       ":" +
-                      widget.minutePicked.value.toString() +
+                      intToDoubleDigit(widget.minutePicked.value) +
                       " " +
                       (widget.isAm.value ? "AM" : "PM"),
                   timerDuration: difference,

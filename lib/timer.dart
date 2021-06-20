@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:meeting_timer/display.dart';
 
+import 'customPageRoute.dart';
+import 'main.dart';
+
 class Timer extends StatefulWidget {
   const Timer({
     required this.deadline,
@@ -68,6 +71,7 @@ class _TimerState extends State<Timer> {
             child: Theme(
               data: ThemeData.light(),
               child: GoBack(
+                timerDuration: widget.timerDuration,
                 deadline: widget.deadline,
               ),
             ),
@@ -80,11 +84,13 @@ class _TimerState extends State<Timer> {
 
 class GoBack extends StatelessWidget {
   const GoBack({
-    Key? key,
     required this.deadline,
+    required this.timerDuration,
+    Key? key,
   }) : super(key: key);
 
   final String deadline;
+  final Duration timerDuration;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +100,19 @@ class GoBack extends StatelessWidget {
       color: Colors.white,
       child: InkWell(
         onLongPress: () {
-          Navigator.of(context).pop();
+          Navigator.of(context).pushReplacement(
+            VerticalSlidePageTransition(
+              animateDown: true,
+              childCurrent: Timer(
+                timerDuration: timerDuration,
+                deadline: deadline,
+              ),
+              child: Theme(
+                data: ThemeData.light(),
+                child: Home(),
+              ),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(56),
         child: Container(
