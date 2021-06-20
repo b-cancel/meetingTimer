@@ -183,7 +183,6 @@ class _HomeState extends State<Home> {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: 16,
-                  horizontal: 16,
                 ),
                 child: StartTimer(
                   isAm: isAm,
@@ -293,7 +292,7 @@ class _StartTimerState extends State<StartTimer> {
     //print as one might expect
     return Material(
       elevation: 8,
-      borderRadius: BorderRadius.circular(56),
+      borderRadius: BorderRadius.circular(24),
       color: Colors.green,
       child: InkWell(
         onTap: () {
@@ -315,7 +314,7 @@ class _StartTimerState extends State<StartTimer> {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(56),
+        borderRadius: BorderRadius.circular(24),
         child: Container(
           height: 56,
           child: Center(

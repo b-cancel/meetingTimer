@@ -20,7 +20,7 @@ class Timer extends StatefulWidget {
 
 class _TimerState extends State<Timer> {
   late DateTime timerStarted;
-  late DateTime caculatedDeadline;
+  late DateTime calculatedDeadline;
 
   automaticReload() async {
     await Future.delayed(
@@ -36,47 +36,110 @@ class _TimerState extends State<Timer> {
   @override
   void initState() {
     timerStarted = DateTime.now();
-    caculatedDeadline = timerStarted.add(widget.timerDuration);
+    calculatedDeadline = timerStarted.add(widget.timerDuration);
     automaticReload();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    Duration duration = caculatedDeadline.difference(DateTime.now());
-    Duration durationAbs = duration.abs();
-    bool isNeg = duration != durationAbs;
+    DateTime now = DateTime.now();
+    double screenWidth = MediaQuery.of(context).size.width;
 
+    //calc max
+    double screenHeight = MediaQuery.of(context).size.height;
+    double toolbarHeight = MediaQuery.of(context).padding.top;
+    double buttonAndPaddingHeight = 56 + (16 * 2);
+    double maxHeight = screenHeight - toolbarHeight - buttonAndPaddingHeight;
+
+    //determine if negative
+    Duration passedTime = calculatedDeadline.difference(now);
+    Duration passedTimeAbs = passedTime.abs();
+    bool isNeg = passedTime != passedTimeAbs;
+
+    //determine heights
+    num positiveHeight;
+    Duration totalTime = calculatedDeadline.difference(timerStarted);
+    num ratio = passedTimeAbs.inMicroseconds / totalTime.inMicroseconds;
+    num negativeHeight = (ratio * maxHeight);
+    positiveHeight = maxHeight - negativeHeight;
+
+    //build
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              color: isNeg == false ? Colors.blue : Colors.red,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(24),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: MyTimerDisplay(
-                  duration: durationAbs,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                color: Colors.black,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    children: [
+                      //blue is on bottom
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.blue,
+                          width: screenWidth,
+                        ),
+                      ),
+                      //black grows from bottom until it fills creen
+                      Positioned(
+                        bottom: 0,
+                        child: Container(
+                          height: isNeg ? maxHeight : positiveHeight.toDouble(),
+                          color: ThemeData.dark().primaryColor,
+                          width: screenWidth,
+                        ),
+                      ),
+                      //start filling in from the top
+                      Positioned(
+                        top: 0,
+                        child: Visibility(
+                          visible: isNeg,
+                          child: Container(
+                            color: Colors.red,
+                            height: (negativeHeight > maxHeight)
+                                ? maxHeight
+                                : negativeHeight.toDouble(),
+                            width: screenWidth,
+                          ),
+                        ),
+                      ),
+                      //the timer on top of everything
+                      Positioned.fill(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.all(24),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: MyTimerDisplay(
+                              duration: passedTimeAbs,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Theme(
-              data: ThemeData.light(),
-              child: GoBack(
-                timerDuration: widget.timerDuration,
-                deadline: widget.deadline,
+            Container(
+              color: Colors.black,
+              padding: EdgeInsets.symmetric(
+                vertical: 16,
+              ),
+              child: Theme(
+                data: ThemeData.light(),
+                child: GoBack(
+                  timerDuration: widget.timerDuration,
+                  deadline: widget.deadline,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -96,7 +159,7 @@ class GoBack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 8,
-      borderRadius: BorderRadius.circular(56),
+      borderRadius: BorderRadius.circular(24),
       color: Colors.white,
       child: InkWell(
         onLongPress: () {
@@ -114,7 +177,7 @@ class GoBack extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(56),
+        borderRadius: BorderRadius.circular(24),
         child: Container(
           height: 56,
           child: Center(
