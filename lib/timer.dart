@@ -89,7 +89,7 @@ class _TimerState extends State<Timer> {
                         bottom: 0,
                         child: Container(
                           height: isNeg ? maxHeight : positiveHeight.toDouble(),
-                          color: ThemeData.dark().primaryColor,
+                          color: Colors.purple[900],
                           width: screenWidth,
                         ),
                       ),
