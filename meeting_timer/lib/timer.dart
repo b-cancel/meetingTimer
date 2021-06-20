@@ -116,6 +116,7 @@ class _TimerState extends State<Timer> {
                             fit: BoxFit.contain,
                             child: MyTimerDisplay(
                               duration: passedTimeAbs,
+                              textColor: Colors.black,
                             ),
                           ),
                         ),

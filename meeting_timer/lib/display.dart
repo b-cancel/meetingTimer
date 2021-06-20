@@ -31,9 +31,11 @@ class MyTimerDisplay extends StatelessWidget {
   const MyTimerDisplay({
     Key? key,
     required this.duration,
+    required this.textColor,
   }) : super(key: key);
 
   final Duration duration;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,7 @@ class MyTimerDisplay extends StatelessWidget {
     return DefaultTextStyle(
       style: TextStyle(
         fontWeight: FontWeight.bold,
+        color: textColor,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

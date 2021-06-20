@@ -336,6 +336,7 @@ class _StartTimerState extends State<StartTimer> {
                   ),
                   MyTimerDisplay(
                     duration: difference,
+                    textColor: Colors.white,
                   ),
                   Padding(
                     padding: EdgeInsets.only(
