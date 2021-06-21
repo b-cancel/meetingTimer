@@ -2,7 +2,7 @@
     package="com.example.meeting_timer">
    <application
         android:label="meeting_timer"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

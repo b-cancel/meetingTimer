@@ -1,0 +1,11 @@
+#regenerate with
+#flutter pub get
+#flutter pub run flutter_launcher_icons:main
+
+flutter_icons:
+  android: "launcher_icon" 
+  ios: true
+  #Required but not used if adaptive icons are supported
+  image_path: "lib/assets/splash.png" 
+  adaptive_icon_foreground: "lib/assets/splash.png"
+  adaptive_icon_background: "#ffffff"
